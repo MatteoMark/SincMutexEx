@@ -1,0 +1,56 @@
+@startuml
+actor Utente
+participant main
+entity datiCondivisi
+
+Utente -> main ++ : start
+
+main -> datiCondivisi ** : new
+Utente -> main : frase da analizzare
+main -> thVisualizza ** : new
+main -> thVisualizza ++ : start
+main -> thVocali_0 ** : new
+main -> thVocali_0 ++ : start
+main -> thVocali_1 ** : new
+main -> thVocali_1 ++ : start
+
+thVocali_0 -> main -- : return
+
+main -> thVocali_2 ** : new
+main -> thVocali_2 : start
+main -> thVocali_3 ** : new
+main -> thVocali_3 ++ : start
+activate thVocali_2
+main -> thVocali_4 ** : new
+main -> thVocali_4 ++ : start
+
+Utente -> main : vocale scelta
+
+
+thVocali_2 -> main : return
+deactivate thVocali_2
+note over main : join thVocali_0
+
+thVisualizza -> Utente : vocali trovate
+
+thVocali_1 -> main : return
+deactivate thVocali_1
+note over main : join thVocali_1
+note over main : join thVocali_2
+note over main : join thVocali_3
+
+
+thVocali_4 -> main : return
+deactivate thVocali_4
+
+thVocali_3 -> main : return
+deactivate thVocali_3
+
+thVisualizza -> main : return
+deactivate thVisualizza
+note over main : join thVocali_4
+note over main : join thVisualizza
+
+main -> datiCondivisi : datiCondivisi.getMax()
+main -> Utente : messaggio
+@enduml
