@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cercavocali;
 
 /**
+ * La classe gestisce un thread che visualizza continuamento il contenuto dello schermo
  *
- * @author giaco & giodabg
+ * @author Giacomo Orsenigo
  */
 public class ThVisualizza extends Thread {
 
@@ -19,21 +15,20 @@ public class ThVisualizza extends Thread {
 
     @Override
     public void run() {
-        final Schermo schermo = ptrDati.getSchermo();
         int numCar = 0;
         while (!ptrDati.sonoFinitiTutti()) {
-            schermo.getSemaforo().Wait();
             String s = ptrDati.getStringSchermo();
             if ((s != null) && (numCar < s.length())) {
                 numCar = s.length();
                 System.out.println(s);
             }
-            schermo.getSemaforo().Signal();
             Thread.yield();
             if (isInterrupted()) {
+                System.out.println("ThVisualizza interrotto");
                 return;
             }
         }
+        // System.out.println("ThVisualizza finito");
     }
 
 }

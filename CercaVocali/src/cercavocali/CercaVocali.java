@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package cercavocali;
 
 import java.io.BufferedReader;
@@ -20,11 +15,10 @@ import java.util.logging.Logger;
 public class CercaVocali {
 
     /**
-     * MAX_TIME = costante che indica il tempo in millisecondi entro cui
+     * TIME_USER = costante che indica il tempo in millisecondi entro cui
      * l'utente deve rispondere
      */
     public static final int TIME_USER = 3000;
-    public static final char[] VOCALI = {'a', 'e', 'i', 'o', 'u'};
 
     /**
      * Scanner per leggere da tastiera
@@ -36,27 +30,33 @@ public class CercaVocali {
      */
     private static final BufferedReader READER = new BufferedReader(new InputStreamReader(System.in));
 
-    private static DatiCondivisi datiCondivisi = new DatiCondivisi(VOCALI);
+    /**
+     * datiCondivisi per memorizzare i dati da condividere tra tutti i thread e il main
+     */
+    private static DatiCondivisi datiCondivisi = new DatiCondivisi();
 
     /**
      * @brief entry point
      *
-     * Chiede all'utente una frase e la vocale più presente crea 5 tread di
-     * classe {@link ThVocali} con le 5 vocali, li avvia e aspetta che abbiano
+     * Chiede all'utente una frase e la vocale più presente
+     * crea 5 tread di classe {@link ThVocali} con le 5 vocali, 
+     * li avvia e aspetta che abbiano
      * terminato l'esecuzione per vedere se l'utente ha vinto
+     * 
      * @param args The command line arguments
      */
     public static void main(String[] args) {
 
+        boolean continua = true;
         do {
             try {
                 String frase = null;
                 char vocInserita = ' ';
 
                 System.out.println("Vuoi utilizzare il delay? [S/N]");
-                boolean delay = YesNoInput();
+                boolean delay = (LeggiSiNo() == 's');
                 System.out.println("Vuoi utilizzare lo yield? [S/N]");
-                boolean yield = YesNoInput();
+                boolean yield = (LeggiSiNo() == 's');
 
                 System.out.println("Inserisci la frase");
                 frase = SCAN.nextLine();
@@ -68,9 +68,9 @@ public class CercaVocali {
                 vis.start();
 
                 //creo e avvio i thread
-                final ThVocali[] thVocali = new ThVocali[5];
+                final ThVocali[] thVocali = new ThVocali[Vocali.NUM_VOCALI];
                 for (int i = 0; i < thVocali.length; i++) {
-                    thVocali[i] = new ThVocali(VOCALI[i], delay, yield, frase, datiCondivisi);
+                    thVocali[i] = new ThVocali(datiCondivisi.getVocale(i), delay, yield, frase, datiCondivisi);
                     thVocali[i].start();
                 }
 
@@ -84,7 +84,7 @@ public class CercaVocali {
                 vis.join();
 
                 //controllo scelta utente
-                char vocVincente = datiCondivisi.getMax();
+                char vocVincente = datiCondivisi.getVocaleMax();
                 if (vocInserita == vocVincente) {
                     System.out.println("Hai indovinato!");
                 } else {
@@ -97,7 +97,13 @@ public class CercaVocali {
                 System.out.println("Tempo scaduto!");
             }
             System.out.println("Vuoi ricominciare? [S/N]");
-        } while (YesNoInput());
+            if (LeggiSiNo() == 's') {
+                datiCondivisi.resetDatiCondivisi();
+            }
+            else
+                continua = false;
+                    
+        } while (continua);
         System.out.println("Ciao! Alla prossima.");
     }
 
@@ -106,31 +112,33 @@ public class CercaVocali {
      *
      * legge una vocale da {@link #reader} se viene inserita entro 3 secondi
      * @return vocale letta
-     * @throws IllegalArgumentException se non viene inserita una vocale
      * @throws TimeoutException se non viene inserito niente entro 3 secondi
-     * @author Giacomo Orsenigo
      */
     private static char leggiVocale() throws TimeoutException {
         char ris = ' ';
+        boolean error = false;
         try {
 
             int i = 0;
-            while (READER.ready()) { //svuoto il buffer
-                READER.read();
-            }
-            while (!READER.ready() && i < TIME_USER) {
-                Thread.sleep(1);
-                i++;
-            }
-            if (READER.ready()) {
-                ris = (char) READER.read();
-            } else {
-                throw new TimeoutException("Tempo scaduto!!");
-            }
+            do {
+                while (READER.ready()) { //svuoto il buffer
+                    READER.read();
+                }
 
-            if (ris != 'a' && ris != 'e' && ris != 'i' && ris != 'o' && ris != 'u') {
-                throw new IllegalArgumentException("Non hai inserito una vocale");
-            }
+                while (!READER.ready() && i < TIME_USER) {
+                    Thread.sleep(1);
+                    i++;
+                }
+                if (READER.ready()) {
+                    ris = (char) READER.read();
+                } else {
+                    throw new TimeoutException();
+                }
+
+                error = (ris != 'a' && ris != 'e' && ris != 'i' && ris != 'o' && ris != 'u');
+                if (error)
+                    System.out.print("Devi inseerire una vocale: ");
+            } while (error);
 
         } catch (IOException | InterruptedException ex) {
             Logger.getLogger(CercaVocali.class.getName()).log(Level.SEVERE, null, ex);
@@ -139,23 +147,23 @@ public class CercaVocali {
 
     }
 
-    private static boolean YesNoInput() {
-        boolean letto = false;
-        boolean continua = false;
+    private static char LeggiSiNo() {
+        char letto = ' ';
+        boolean continua = true;
         do {
             String s = SCAN.nextLine().toLowerCase();
             if (s.equals("s") || s.equals("si")) {
-                letto = true;
-                continua = true;
-            } else if (s.equals("n") || s.equals("no")) {
-                letto = true;
+                letto = 's';
                 continua = false;
-            }
-            else
+            } else if (s.equals("n") || s.equals("no")) {
+                letto = 'n';
+                continua = false;
+            } else {
                 System.out.print("inserire [S/N] ");
+            }
 
-        } while (!letto);
-        return continua;
+        } while (continua);
+        return letto;
     }
 
 }
