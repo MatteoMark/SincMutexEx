@@ -7,6 +7,7 @@ package nb_corsacavalli;
 
 import java.io.IOException;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,7 +18,6 @@ import java.util.logging.Logger;
  * La classe collabora con le classi: ThCorsa, DatiCondivisi
  */
 public class NB_CorsaCavalli {
-
 
     /**
      * @author Galimberti_Francesco
@@ -35,12 +35,18 @@ public class NB_CorsaCavalli {
 
         try {
             // TODO code application logic here
+            //code by Lamarque Matteo
+            /*
+            @brief replace join with mutex.
+             */
+            Semaphore joinMutex = new Semaphore(-4);
+            //end code by Lamarque Matteo
             java.io.BufferedReader console = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
             Scanner input = new Scanner(System.in);
 
             boolean finito = false;
 
-            DatiCondivisi dati = new DatiCondivisi();
+            DatiCondivisi dati = new DatiCondivisi(joinMutex);
             ThCorsa Clop1 = new ThCorsa(1, true, true, dati);
             ThCorsa Clop2 = new ThCorsa(2, true, true, dati);
             ThCorsa Clop3 = new ThCorsa(3, true, true, dati);
@@ -49,22 +55,26 @@ public class NB_CorsaCavalli {
 
             System.out.println("Su che cavallo punti? 1/2/3/4/5");
             int numCav = input.nextInt();
-
             Clop1.start();
             Clop2.start();
             Clop3.start();
             Clop4.start();
             Clop5.start();
-
+            
             while (!finito) {
-                dati.visualizzaLinee();
-                String s = console.readLine();
-                if (s.endsWith(" ")) {
-                    finito = true;
-                } else {
-                    clearConsole();
+                try {
+                    dati.visualizzaLinee();
+                    String s = console.readLine();
+                    if (s.endsWith(" ")) {
+                        finito = true;
+                    } else {
+                        clearConsole();
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(NB_CorsaCavalli.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+
 
             Clop1.interrupt();
             Clop2.interrupt();
@@ -72,13 +82,16 @@ public class NB_CorsaCavalli {
             Clop4.interrupt();
             Clop5.interrupt();
 
+            //code by Lamarque Matteo
+            joinMutex.acquire();
+            //end code by Lamarque Matteo
+            
             //attendi
-            Clop1.join();
-            Clop2.join();
-            Clop3.join();
-            Clop4.join();
-            Clop5.join();
-
+            //Clop1.join();
+            //Clop2.join();
+            //Clop3.join();
+            //Clop4.join();
+            //Clop5.join();
             int max = 0;
             int cavallo = 0;
             if (dati.getnClop1() > max) {
@@ -118,7 +131,7 @@ public class NB_CorsaCavalli {
             }
 
             System.out.println("Alla prossima!");
-        } catch (IOException | InterruptedException ex) {
+        } catch (InterruptedException ex) {
             Logger.getLogger(NB_CorsaCavalli.class.getName()).log(Level.SEVERE, null, ex);
         }
 

@@ -6,6 +6,7 @@
 package nb_corsacavalli;
 
 import java.util.Random;
+import java.util.concurrent.Semaphore;
 
 /**
  * @author Galimberti_Francesco
@@ -98,6 +99,7 @@ public class ThCorsa extends Thread {
             }
         } catch (InterruptedException ex) {
             // Logger.getLogger(ThCorsa.class.getName()).log(Level.SEVERE, null, ex);
+            ptrDati.Signal();
         }
 
         switch (this.nThread) {
