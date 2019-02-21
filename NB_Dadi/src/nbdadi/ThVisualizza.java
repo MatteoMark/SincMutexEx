@@ -56,8 +56,6 @@ public class ThVisualizza extends Thread {
     }
 
     /**
-     * @brief: Metodo "main" dei thread che vengono creati con l'uso di questa
-     * classe
      *
      * Alla variabile num viene assegnato un numero randomico tra 1 e 6,si fa
      * l'output di una strigna. Successivamente in base al valore assunto
@@ -66,7 +64,7 @@ public class ThVisualizza extends Thread {
      * il valore che gli viene passato agli attributi della classe
      * CDatiCondivisi, infine si fa attendere al thread 2 secondi con il metodo
      * sleep(2000) oppure si fa ritornare il processo in stato di ready con il
-     * metodo yield().
+     * metodo ().
      *
      */
     @Override
