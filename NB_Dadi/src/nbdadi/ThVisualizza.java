@@ -83,10 +83,10 @@ public class ThVisualizza extends Thread {
         } catch (InterruptedException ex) {
             Logger.getLogger(ThVisualizza.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        PtrDati.Signal();
     }
 
-        /**
+    /**
      * @brief: Metodo usato per pulire la console
      *
      * In questo metodo viene dichiarata una stringa che andrà ad assumere il

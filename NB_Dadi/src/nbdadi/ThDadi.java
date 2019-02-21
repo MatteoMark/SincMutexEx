@@ -96,8 +96,8 @@ public class ThDadi extends Thread {
                 }
             }
         } catch (InterruptedException ex) {
-
         }
+        PtrDati.Signal();
 
     }
 

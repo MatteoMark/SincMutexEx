@@ -5,6 +5,8 @@
  */
 package nbdadi;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * @author Tosetti Luca
  *
@@ -33,6 +35,12 @@ public class CDatiCondivisi {
      */
     private int terzoDado;
 
+    //code by Lamarque Matteo
+    /*
+    * @brief replace join with mutex
+    */
+    private Semaphore joinMutex;
+    //end code by Lamarque Matteo
     /**
      * @brief: Metodo costruttore con parametri che inizializza la slot machine
      *
@@ -45,7 +53,7 @@ public class CDatiCondivisi {
      * @param terzoDado valore che si vuole far assumere al terzoDado
      *
      */
-    public CDatiCondivisi(int primoDado, int secondoDado, int terzoDado) {
+    public CDatiCondivisi(int primoDado, int secondoDado, int terzoDado, Semaphore joinMutex) {
         schermo = new String[10000];
         for (int i = 0; i < 10000; i++) {
             schermo[i] = "";
@@ -54,6 +62,7 @@ public class CDatiCondivisi {
         this.secondoDado = secondoDado;
         this.terzoDado = terzoDado;
         this.Elementi = 0;
+        this.joinMutex = joinMutex;
     }
 
     /**
@@ -64,7 +73,7 @@ public class CDatiCondivisi {
      * vengono inizializzate a "".
      *
      */
-    public CDatiCondivisi() {
+    public CDatiCondivisi(Semaphore joinMutex) {
         this.primoDado = 0;
         this.secondoDado = 0;
         this.terzoDado = 0;
@@ -73,6 +82,7 @@ public class CDatiCondivisi {
             schermo[i] = "";
         }
         this.Elementi = 0;
+        this.joinMutex = joinMutex;
     }
     /**
      * @brief Metodo get dell'attributo Elementi
@@ -108,7 +118,7 @@ public class CDatiCondivisi {
      * @param primoDado valore da assegnare all'attributo primoDado
      *
      */
-    public void setPrimoDado(int primoDado) {
+    synchronized public void setPrimoDado(int primoDado) {
         this.primoDado = primoDado;
     }
 
@@ -134,7 +144,7 @@ public class CDatiCondivisi {
      * @param secondoDado valore da assegnare all'attributo secondoDado
      *
      */
-    public void setSecondoDado(int secondoDado) {
+    synchronized public void setSecondoDado(int secondoDado) {
         this.secondoDado = secondoDado;
     }
 
@@ -160,7 +170,7 @@ public class CDatiCondivisi {
      * @param terzoDado valore da assegnare all'attributo terzoDado
      *
      */
-    public void setTerzoDado(int terzoDado) {
+    synchronized public void setTerzoDado(int terzoDado) {
         this.terzoDado = terzoDado;
     }
     
@@ -204,9 +214,15 @@ public class CDatiCondivisi {
      * 
      * @param str Stringa in cui è contenuto il valore della linea di testo da memorizzare.
      */
-    public void aggiungiStringa(String str) {
+    synchronized public void aggiungiStringa(String str) {
         schermo[Elementi] = str;
         Elementi++;
     }
-
+    
+    /*
+    * @brief replace release
+    */
+    synchronized public void Signal(){
+        joinMutex.release();
+    }
 }
