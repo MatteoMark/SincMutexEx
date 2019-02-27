@@ -36,27 +36,27 @@ public class DatiCondivisi {
         this.p=0;
     }
 
-    public int getContaDIN() {
+    synchronized public int getContaDIN() {
         return contaDIN;
     }
 
-    public void setContaDIN(int contaDIN) {
+    synchronized public void setContaDIN(int contaDIN) {
         this.contaDIN = contaDIN;
     }
 
-    public int getContaDON() {
+    synchronized public int getContaDON() {
         return contaDON;
     }
 
-    public void setContaDON(int contaDON) {
+    synchronized public void setContaDON(int contaDON) {
         this.contaDON = contaDON;
     }
 
-    public int getContaDAN() {
+    synchronized public int getContaDAN() {
         return contaDAN;
     }
 
-    public void setContaDAN(int contaDAN) {
+    synchronized public void setContaDAN(int contaDAN) {
         this.contaDAN = contaDAN;
     }
     
@@ -82,7 +82,7 @@ public class DatiCondivisi {
         }
         return x;
     }
-    public void aggiungi(String x) {
+    synchronized public void aggiungi(String x) {
         if (p >= maxElem)
             p = 0;
         schermo[p]=x;
