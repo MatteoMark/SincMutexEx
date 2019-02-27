@@ -96,11 +96,10 @@ public class ThSuono extends Thread {
                 sleep(randomNum);
 
                 if (Thread.currentThread().isInterrupted()) {
-                    break;
+                    ptrDati.Signal();
                 }
             }
         } catch (InterruptedException ex) {
-
         }
     }
 }
