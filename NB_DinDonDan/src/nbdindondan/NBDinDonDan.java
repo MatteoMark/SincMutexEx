@@ -31,6 +31,11 @@ public class NBDinDonDan {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         Scanner scegli = new Scanner(System.in);
         String interruzione;
+         /*
+            @brief replace join with mutex.
+             */
+            Semaphore joinMutex = new Semaphore(-4);
+            //end code by Lamarque Matteo
         System.out.println("Per terminare premere un tasto.");
         /*System.out.println("Scelta 1: solo sleep");
         System.out.println("Scelta 2: sleep + yield");
@@ -61,9 +66,12 @@ public class NBDinDonDan {
             th2.interrupt();
             th3.interrupt();
             
-            th1.join();
-            th2.join();
-            th3.join();
+            //th1.join();
+            //th2.join();
+            //th3.join();
+            //code by Lamarque Matteo
+            joinMutex.acquire();
+            //end code by Lamarque Matteo
             
 
             System.out.println("Qual è il suono che è stato richiamato più volte?");
