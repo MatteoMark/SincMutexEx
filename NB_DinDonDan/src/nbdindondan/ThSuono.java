@@ -5,6 +5,7 @@
  */
 package nbdindondan;
 
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -37,14 +38,26 @@ public class ThSuono extends Thread {
      */
     DatiCondivisi ptrdati;
 
+    /*
+    @brief semaphore that allows sinchronization
+     */
+    Semaphore sincMutex;
+
+    /*
+    @brief semaphore to release
+     */
+    Semaphore nextMutex;
+
     /**
      * @param p
      * @brief Costruttore con parametri
      *
      * @param x Gli passo il suo da eseguire
      * @param y Scelta opzione
+     * @param sincM sinchronization mutex
+     * @param nextM mutex to release
      */
-    public ThSuono(String x, int y, DatiCondivisi p) {
+    public ThSuono(String x, int y, DatiCondivisi p, Semaphore sincM, Semaphore nextM) {
         suono = x;
         scelta = y;
         if (scelta == 1) {
@@ -60,6 +73,10 @@ public class ThSuono extends Thread {
             faiSleep = false;
         }
         ptrdati = p;
+
+        sincMutex = sincM;
+
+        nextMutex = nextM;
     }
 
     /**
@@ -70,36 +87,30 @@ public class ThSuono extends Thread {
         boolean verify = true;
         try {
             while (verify == true) {
-                if (faiSleep == true && faiYield == false) {
-                    System.out.println(suono);
+                sincMutex.acquire();
+                ptrdati.aggiungi(suono);
+                if (suono.equals("DIN")) {
+                    ptrdati.setContaDIN(ptrdati.getContaDIN() + 1);
                 }
-                if (faiYield == true && faiSleep == true) {
-                    System.out.println(suono);
-                    yield();
+                if (suono.equals("DON")) {
+                    ptrdati.setContaDON(ptrdati.getContaDON() + 1);
                 }
-                if (faiSleep == false && faiYield == true) {
-                    yield();
-                    ptrdati.aggiungi(suono);
-                    if (suono.equals("DIN")) {
-                        ptrdati.setContaDIN(ptrdati.getContaDIN() + 1);
-                    }
-                    if (suono.equals("DON")) {
-                        ptrdati.setContaDON(ptrdati.getContaDON() + 1);
-                    }
-                    if (suono.equals("DAN")) {
-                        ptrdati.setContaDAN(ptrdati.getContaDAN() + 1);
-                    }
+                if (suono.equals("DAN")) {
+                    ptrdati.setContaDAN(ptrdati.getContaDAN() + 1);
+                    // }
                 }
+                nextMutex.release();
                 int min = 100;
                 int max = 1000;
                 int randomNum = ThreadLocalRandom.current().nextInt(min, max + 1);
                 sleep(randomNum);
 
                 if (Thread.currentThread().isInterrupted()) {
-                    ptrDati.Signal();
+                    ptrdati.getMutex().release();
                 }
             }
         } catch (InterruptedException ex) {
+            ptrdati.getMutex().release();
         }
     }
 }

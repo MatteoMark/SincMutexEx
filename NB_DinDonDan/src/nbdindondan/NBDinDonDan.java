@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +35,14 @@ public class NBDinDonDan {
          /*
             @brief replace join with mutex.
              */
-            Semaphore joinMutex = new Semaphore(-4);
+            Semaphore joinMutex = new Semaphore(-2);
+            
+            /*
+            @brief mutex that allows sinchronization
+            */
+            Semaphore sincMutex1 = new Semaphore(1);
+            Semaphore sincMutex2 = new Semaphore(0);
+            Semaphore sincMutex3 = new Semaphore(0);
             //end code by Lamarque Matteo
         System.out.println("Per terminare premere un tasto.");
         /*System.out.println("Scelta 1: solo sleep");
@@ -42,25 +50,19 @@ public class NBDinDonDan {
         System.out.println("Scelta 3: solo yield");
         int scelta=scegli.nextInt();
          */
-        DatiCondivisi dati = new DatiCondivisi();
+        DatiCondivisi dati = new DatiCondivisi(joinMutex);
 
-        ThSuono th1 = new ThSuono("DIN", 3, dati);
-        ThSuono th2 = new ThSuono("DON", 3, dati);
-        ThSuono th3 = new ThSuono("DAN", 3, dati);
+        ThSuono th1 = new ThSuono("DIN", 3, dati, sincMutex1, sincMutex2);//param next semaphore
+        ThSuono th2 = new ThSuono("DON", 3, dati, sincMutex2, sincMutex3);
+        ThSuono th3 = new ThSuono("DAN", 3, dati, sincMutex3, sincMutex1);
         try {
             th1.start();
             th2.start();
             th3.start();
             
             boolean loop = true;
-            while(loop){
+            while(System.in.available() == 0){
                 dati.printSchermo();
-                interruzione = input.readLine();
-
-                if (interruzione.equals("")) {
-                    clearConsole();
-                    loop = false;
-                }
             }
             th1.interrupt();
             th2.interrupt();
